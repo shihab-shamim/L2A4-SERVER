@@ -1,0 +1,238 @@
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  STUDENT
+  TUTOR
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  BANNED
+}
+
+enum BookingStatus {
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id           String     @id @default(uuid())
+  name         String
+  email        String     @unique
+  role         Role
+  status       UserStatus @default(ACTIVE)
+
+  avatarUrl String?
+  phone     String?
+  bio       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  tutorProfile TutorProfile?
+
+  // Student -> Bookings + Reviews
+  studentBookings Booking[] @relation("StudentBookings")
+  studentReviews  Review[]  @relation("StudentReviews")
+
+  // Tutor -> Bookings + Reviews + Availability
+  tutorBookings Booking[]          @relation("TutorBookings")
+  tutorReviews  Review[]           @relation("TutorReviews")
+  availability  AvailabilitySlot[] @relation("TutorAvailability")
+
+  emailVerified Boolean   @default(false)
+  image         String?
+  sessions      Session[]
+  accounts      Account[]
+
+  @@index([role])
+  @@index([status])
+  @@index([createdAt])
+  @@map("user")
+}
+
+model TutorProfile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  headline   String? // e.g. "Math Tutor | 5+ years"
+  about      String?
+  hourlyRate Int     @default(0) // store in smallest unit if you want (e.g. cents); or keep int
+  currency   String  @default("BDT")
+
+  // Quick search / filtering
+  subjects  String[] // e.g. ["Math", "Physics"]
+  languages String[] // e.g. ["English", "Bangla"]
+
+  ratingAvg     Float @default(0)
+  totalReviews  Int   @default(0)
+  totalSessions Int   @default(0)
+
+  // Optional: verification / featured
+  isFeatured Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([hourlyRate])
+  @@index([ratingAvg])
+  @@index([isFeatured])
+}
+
+model Category {
+  id       String  @id @default(cuid())
+  name     String
+  slug     String  @unique
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  bookings Booking[]
+
+  @@index([isActive])
+  @@index([name])
+}
+
+model AvailabilitySlot {
+  id      String @id @default(cuid())
+  tutorId String
+  tutor   User   @relation("TutorAvailability", fields: [tutorId], references: [id], onDelete: Cascade)
+
+  startTime DateTime
+  endTime   DateTime
+
+  // slot lock info
+  isBooked Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  booking Booking?
+
+  // Prevent exact duplicate time windows for same tutor
+  @@index([tutorId, startTime])
+  @@index([tutorId, isBooked])
+  @@unique([tutorId, startTime, endTime])
+}
+
+model Booking {
+  id String @id @default(cuid())
+
+  studentId String
+  student   User   @relation("StudentBookings", fields: [studentId], references: [id], onDelete: Restrict)
+
+  tutorId String
+  tutor   User   @relation("TutorBookings", fields: [tutorId], references: [id], onDelete: Restrict)
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  // Link to a reserved slot
+  slotId String?           @unique
+  slot   AvailabilitySlot? @relation(fields: [slotId], references: [id], onDelete: SetNull)
+
+  startTime DateTime
+  endTime   DateTime
+
+  status BookingStatus @default(CONFIRMED)
+
+  // pricing snapshot (in case tutor rate changes later)
+  price    Int    @default(0)
+  currency String @default("BDT")
+
+  note String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  review Review?
+
+  @@index([studentId, createdAt])
+  @@index([tutorId, createdAt])
+  @@index([status, createdAt])
+  @@index([categoryId])
+}
+
+model Review {
+  id String @id @default(cuid())
+
+  bookingId String  @unique
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  studentId String
+  student   User   @relation("StudentReviews", fields: [studentId], references: [id], onDelete: Restrict)
+
+  tutorId String
+  tutor   User   @relation("TutorReviews", fields: [tutorId], references: [id], onDelete: Restrict)
+
+  rating  Int // 1..5 validate in app layer
+  comment String?
+
+  createdAt DateTime @default(now())
+
+  @@index([tutorId, createdAt])
+  @@index([studentId, createdAt])
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
