@@ -92,7 +92,7 @@ model TutorProfile {
 }
 
 model Category {
-  id       String  @id @default(cuid())
+  id       String  @id @default(uuid())
   name     String
   slug     String  @unique
   isActive Boolean @default(true)
@@ -168,7 +168,7 @@ model Booking {
 }
 
 model Review {
-  id String @id @default(cuid())
+  id String @id @default(uuid())
 
   bookingId String  @unique
   booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
@@ -187,6 +187,7 @@ model Review {
   @@index([tutorId, createdAt])
   @@index([studentId, createdAt])
 }
+
 
 model Session {
   id        String   @id

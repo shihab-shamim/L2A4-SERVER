@@ -8,7 +8,8 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
 
-  trustedOrigins: [process.env.APP_URL!],
+  trustedOrigins: [process.env.APP_URL ?? "http://localhost:3000",
+  "http://127.0.0.1:3000",],
 
   user: {
     additionalFields: {
@@ -32,7 +33,7 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
-    autoSignIn: true,             
+    autoSignIn: false,             
     requireEmailVerification: false 
   },
 

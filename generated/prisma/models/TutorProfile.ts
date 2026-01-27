@@ -634,10 +634,6 @@ export type FloatFieldUpdateOperationsInput = {
   divide?: number
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type TutorProfileCreateWithoutUserInput = {
   id?: string
   headline?: string | null

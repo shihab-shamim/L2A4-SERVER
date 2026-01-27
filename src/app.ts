@@ -4,6 +4,8 @@ import express, { Application, Request, Response } from "express";
 import { toNodeHandler } from "better-auth/node";
 import cors from 'cors';
 import { auth } from "../lib/auth";
+import { tutorProfile } from "./modules/tutorProfile/tutorProfile.routes";
+import { users } from "./modules/user/user.routes";
 
 
 
@@ -19,6 +21,9 @@ app.use(express.json());
 
 
 app.all("/api/auth/*splat", toNodeHandler(auth));
+app.use("/api",tutorProfile);
+app.use("/api",users);
+
 app.get("/", (req, res) => {
     res.send("Hello From skillBridge");
 });
