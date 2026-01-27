@@ -7,7 +7,7 @@ import { userController } from './user.controller';
 const router = express.Router();
 // auth(UserRole.TUTOR)
 router.get("/users",auth(UserRole.ADMIN),userController.getAllUser)
-router.put("/users",userController.userActionUpdated)
+router.put("/users",auth(UserRole.ADMIN),userController.userActionUpdated)
 
 export const users: Router = router;
 

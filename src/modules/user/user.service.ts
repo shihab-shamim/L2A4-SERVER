@@ -11,7 +11,7 @@ import { prisma } from "../../../lib/prisma";
 const userActionUpdated =async(email:string,status:"ACTIVE" | "BANNED") =>{
     const result =await prisma.user.update({
       where: {
-        email: email, // OR just email
+        email: email,
       },
       data: {
         status: status,
