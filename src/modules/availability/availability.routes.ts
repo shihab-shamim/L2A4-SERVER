@@ -1,12 +1,94 @@
 import express, { Response, Router,Request, NextFunction } from 'express';
 import auth, { UserRole } from '../../middlewares/auth';
+import { prisma } from '../../../lib/prisma';
+import { error } from 'node:console';
 
 const router = express.Router();
 // auth(UserRole.TUTOR)
 router.post("/availability",async(req:Request,res:Response)=>{
     console.log(req.body);
+    try {
+         const { tutorId, startTime, endTime } = req.body;
+
+        const data=await prisma.availabilitySlot.create({
+      data: {
+        tutor: {
+          connect: { id: tutorId }, 
+        },
+        startTime: new Date(startTime),
+        endTime: new Date(endTime),
+      },
+    });
+        console.log(data);
+
+        if(data){
+            res.status(201).send({data:data,message:"Tutor Profile Create Success"})
+         }
+
+
+        
+    }catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                return res.status(500).json({
+                error: "Availability slot create failed",
+                message: error.message,
+                });
+            }
+
+            console.error(error);
+            return res.status(500).json({
+                error: "Availability slot create failed",
+                message: "Unknown error occurred",
+            });
+
+
+            }
 
 })
+
+router.get("/availability/:id",async(req:Request,res:Response)=>{
+    const {id}=req.params 
+    if(!id){
+         res.status(400).send({error:"tutor id undefined for availability slot",message:"Availability slot create failed"})
+    }
+   
+    try {
+         
+
+        const data=await prisma.availabilitySlot.findMany({
+            where:{
+                tutorId:id as string
+            }
+        })
+
+        if(data){
+            res.status(201).send({data:data,message:"Availability slot Create Success"})
+         }
+
+
+        
+    }catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                return res.status(500).json({
+                error: "Availability slot create failed",
+                message: error.message,
+                });
+            }
+
+            console.error(error);
+            return res.status(500).json({
+                error: "Availability slot create failed",
+                message: "Unknown error occurred",
+            });
+
+
+            }
+
+})
+
+
 
 
 
