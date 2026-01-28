@@ -9,7 +9,8 @@ declare global {
                 email:string,
                 name:string,
                 role:string,
-                emailVerified:boolean
+                emailVerified:boolean,
+                status: "ACTIVE" | "BANNED"
             }
         }
     }
@@ -53,7 +54,8 @@ declare global {
             email:session.user.email,
             role:session.user.role as string,
             emailVerified:true,
-            name:session.user.name
+            name:session.user.name,
+            status:session.user.status as "ACTIVE" | "BANNED"
 
         }
 

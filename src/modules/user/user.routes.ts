@@ -1,6 +1,5 @@
 
 import express, { Response, Router,Request, NextFunction } from 'express';
-import { prisma } from '../../../lib/prisma';
 import auth, { UserRole } from '../../middlewares/auth';
 import { userController } from './user.controller';
 

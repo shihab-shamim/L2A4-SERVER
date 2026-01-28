@@ -107,8 +107,9 @@ model Category {
   @@index([name])
 }
 
+
 model AvailabilitySlot {
-  id      String @id @default(cuid())
+  id      String @id @default(uuid())
   tutorId String
   tutor   User   @relation("TutorAvailability", fields: [tutorId], references: [id], onDelete: Cascade)
 

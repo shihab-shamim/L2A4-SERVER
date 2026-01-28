@@ -7,6 +7,13 @@ const createTutorProfile=async(req:Request,res:Response)=>{
     // if(userId){
     //     return
     // }
+      if(req.user?.status === "BANNED"){
+        return res.status(404).json({
+        success: false,
+        error: "Tutor profile not Update ! You are Banned",
+        data: null,
+      });
+    }
    
     try {
         const data = await tutorProfileService.createTutorProfile(req.body )
@@ -35,6 +42,7 @@ const createTutorProfile=async(req:Request,res:Response)=>{
 
 
 }
+
 
 
 
