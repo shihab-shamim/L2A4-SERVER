@@ -5,8 +5,15 @@ import { error } from 'node:console';
 
 const router = express.Router();
 // auth(UserRole.TUTOR)
-router.post("/availability",async(req:Request,res:Response)=>{
-    console.log(req.body);
+router.post("/availability",auth(UserRole.TUTOR),async(req:Request,res:Response)=>{
+     if(req.user?.status === "BANNED"){
+        return res.status(404).json({
+        success: false,
+        error:"Tutor profile not Update ! You are Banned",
+        data: null,
+      });
+    }
+    
     try {
          const { tutorId, startTime, endTime } = req.body;
 
