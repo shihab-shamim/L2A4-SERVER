@@ -137,6 +137,65 @@ router.delete("/availability/:id",auth(UserRole.TUTOR),async(req:Request,res:Res
 
 })
 
+router.put(
+  "/availability/:id",
+  auth(UserRole.TUTOR),
+  async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+
+    if (!id) {
+      return res.status(400).json({
+        error: "slot id missing",
+        message: "Availability slot update failed",
+      });
+    }
+
+    try {
+      const { startTime, endTime } = req.body as {
+        startTime?: string;
+        endTime?: string;
+      };
+
+      if (!startTime || !endTime) {
+        return res.status(400).json({
+          error: "startTime/endTime missing",
+          message: "Availability slot update failed",
+        });
+      }
+
+      const data = await prisma.availabilitySlot.update({
+        where: { id },
+        data: {
+          startTime: new Date(startTime),
+          endTime: new Date(endTime),
+        },
+      });
+
+      return res.status(200).json({
+        data,
+        message: "Availability slot update success",
+      });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error(error.message);
+        return res.status(500).json({
+          error: "Availability slot update failed",
+          message: error.message,
+        });
+      }
+
+      console.error(error);
+      return res.status(500).json({
+        error: "Availability slot update failed",
+        message: "Unknown error occurred",
+      });
+    }
+  }
+);
+
+
+
+
 
 
 
