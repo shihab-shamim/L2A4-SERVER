@@ -46,8 +46,15 @@ router.post("/availability",async(req:Request,res:Response)=>{
             }
 
 })
+//  if(req.user?.status === "BANNED"){
+//         return res.status(404).json({
+//         success: false,
+//         error: "Tutor profile not Update ! You are Banned",
+//         data: null,
+//       });
+//     }
 
-router.get("/availability/:id",async(req:Request,res:Response)=>{
+router.get("/availability/:id",auth(UserRole.TUTOR),async(req:Request,res:Response)=>{
     const {id}=req.params 
     if(!id){
          res.status(400).send({error:"tutor id undefined for availability slot",message:"Availability slot create failed"})
@@ -63,7 +70,7 @@ router.get("/availability/:id",async(req:Request,res:Response)=>{
         })
 
         if(data){
-            res.status(201).send({data:data,message:"Availability slot Create Success"})
+            res.status(200).send({data:data,message:"Availability slot get Success"})
          }
 
 
@@ -87,6 +94,49 @@ router.get("/availability/:id",async(req:Request,res:Response)=>{
             }
 
 })
+
+router.delete("/availability/:id",auth(UserRole.TUTOR),async(req:Request,res:Response)=>{
+    const id=req.params.id as string;
+   
+    if(!id){
+         res.status(400).send({error:"tutor id undefined for availability slot",message:"Availability slot delete failed"})
+    }
+   
+    try {
+         
+
+        const data=await prisma.availabilitySlot.delete({
+            where:{
+                id 
+            }
+        })
+
+        if(data){
+            res.status(200).send({data:data,message:"Availability slot Delete Success"})
+         }
+
+
+        
+    }catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error(error.message);
+                return res.status(500).json({
+                error: "Availability slot create failed",
+                message: error.message,
+                });
+            }
+
+            console.error(error);
+            return res.status(500).json({
+                error: "Availability slot create failed",
+                message: "Unknown error occurred",
+            });
+
+
+            }
+
+})
+
 
 
 
