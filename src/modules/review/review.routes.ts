@@ -4,7 +4,7 @@ import { prisma } from '../../../lib/prisma';
 
 
 const router = express.Router();
-router.post("/review", async (req: Request, res: Response) => {
+router.post("/review",auth(UserRole.STUDENT), async (req: Request, res: Response) => {
   const { studentId, tutorId, rating, comment, bookingId } = req.body;
 
   if (req.user?.status === "BANNED") {
