@@ -16,7 +16,7 @@ declare global {
     }
 }
  export enum UserRole{
-    USER='USER',
+    STUDENT='STUDENT',
     ADMIN='ADMIN',
     TUTOR="TUTOR"
  }
