@@ -5,8 +5,15 @@ import { prisma } from '../../../lib/prisma';
 
 const router = express.Router();
 
-router.post("/booking", async (req: Request, res: Response) => {
+router.post("/booking",auth(UserRole.STUDENT), async (req: Request, res: Response) => {
   const { slotId, studentId, tutorId, startTime, endTime } = req.body;
+      if(req.user?.status === "BANNED"){
+        return res.status(404).json({
+        success: false,
+        error: "Tutor profile not Update ! You are Banned",
+        data: null,
+      });
+    }
 
   if (!slotId || !studentId || !tutorId || !startTime || !endTime) {
     return res.status(400).json({
@@ -34,14 +41,11 @@ router.post("/booking", async (req: Request, res: Response) => {
 
   try {
     // Ensure foreign keys exist
-    const [studentExists, tutorExists, slot] = await Promise.all([
-      prisma.user.findUnique({ where: { id: studentId } }),
-      prisma.user.findUnique({ where: { id: tutorId } }),
+    const [slot] = await Promise.all([
       prisma.availabilitySlot.findUnique({ where: { id: slotId } }),
     ]);
 
-    if (!studentExists) return res.status(404).json({ error: "student not found" });
-    if (!tutorExists) return res.status(404).json({ error: "tutor not found" });
+
     if (!slot) return res.status(404).json({ error: "slot not found" });
 
     if (slot.isBooked) {
@@ -81,6 +85,114 @@ router.post("/booking", async (req: Request, res: Response) => {
     return res.status(500).json({ error: "booking failed" });
   }
 });
+router.get("/booking/:id",auth(UserRole.STUDENT),async(req: Request, res: Response)=>{
+
+    const {id}=req.params ;
+    try {
+        const result=await prisma.booking.findMany({where:{studentId:id as string}})
+        if(result){
+             return res.status(200).json({
+                data:result,
+             error: null,
+      
+      });
+        }
+        
+    }  catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({
+        error: "booking get failed",
+        message: error.message,
+      });
+    }
+    return res.status(500).json({ error: "booking get failed" });
+  }
+})
+
+router.patch(
+  "/booking/:id/cancel",
+  auth(UserRole.STUDENT),
+  async (req: Request, res: Response) => {
+    console.log("params", req.params.id);
+
+    const { id } = req.params; // bookingId
+
+    try {
+      // booking exists?
+      const booking = await prisma.booking.findUnique({
+        where: { id: id as string },
+        select: { id: true, studentId: true, slotId: true, status: true },
+      });
+
+      if (!booking) {
+        return res.status(404).json({
+          data: null,
+          error: "booking not found",
+        });
+      }
+
+      // already cancelled?
+      if (booking.status === "CANCELLED") {
+        return res.status(409).json({
+          data: null,
+          error: "booking already cancelled",
+        });
+      }
+
+      // ✅ Transaction: cancel booking + free slot
+      const result = await prisma.$transaction(async (tx) => {
+        const updatedBooking = await tx.booking.update({
+          where: { id: booking.id },
+          data: { status: "CANCELLED" },
+        });
+
+        if (booking.slotId) {
+          await tx.availabilitySlot.update({
+            where: { id: booking.slotId },
+            data: { isBooked: false },
+          });
+        }
+
+        return updatedBooking;
+      });
+
+      return res.status(200).json({
+        data: result,
+        error: null,
+      });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return res.status(500).json({
+          error: "booking cancel failed",
+          message: error.message,
+        });
+      }
+      return res.status(500).json({ error: "booking cancel failed" });
+    }
+  }
+);
+router.get("/booking",auth(UserRole.ADMIN),async(req: Request, res: Response)=>{
+
+    try {
+        const result=await prisma.booking.findMany()
+        if(result){
+             return res.status(200).json({
+                data:result,
+             error: null,
+      
+      });
+        }
+        
+    }  catch (error: unknown) {
+    if (error instanceof Error) {
+      return res.status(500).json({
+        error: "booking get failed",
+        message: error.message,
+      });
+    }
+    return res.status(500).json({ error: "booking get failed" });
+  }
+})
 
 
 
