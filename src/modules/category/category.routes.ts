@@ -1,7 +1,7 @@
 import express, { Response, Router,Request, NextFunction } from 'express';
 import auth, { UserRole } from '../../middlewares/auth';
 import { prisma } from '../../../lib/prisma';
-import { error } from 'node:console';
+
 
 const router = express.Router();
 

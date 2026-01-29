@@ -9,6 +9,7 @@ import { users } from "./modules/user/user.routes";
 import { availability } from "./modules/availability/availability.routes";
 import { category } from "./modules/category/category.routes";
 import { booking } from "./modules/booking/booking.routes";
+import { review } from "./modules/review/review.routes";
 
 
 
@@ -29,6 +30,7 @@ app.use("/api",users);
 app.use("/api",availability);
 app.use("/api",category);
 app.use("/api",booking);
+app.use("/api",review);
 
 app.get("/", (req, res) => {
     res.send("Hello From skillBridge");
