@@ -5,7 +5,7 @@ import { error } from 'node:console';
 
 const router = express.Router();
 
-router.post("/category",async(req:Request,res:Response)=>{
+router.post("/category",auth(UserRole.ADMIN),async(req:Request,res:Response)=>{
 
     const {name,slug,isActive}=req.body
     try {
@@ -36,7 +36,7 @@ router.post("/category",async(req:Request,res:Response)=>{
             }
 })
 
-router.get("/category",async(req:Request,res:Response)=>{
+router.get("/category",auth(UserRole.ADMIN),async(req:Request,res:Response)=>{
     try {
         
        const result = await prisma.category.findMany();
@@ -62,7 +62,7 @@ router.get("/category",async(req:Request,res:Response)=>{
             }
 })
 
-router.delete("/category",async(req:Request,res:Response)=>{
+router.delete("/category",auth(UserRole.ADMIN),async(req:Request,res:Response)=>{
     const id=req.query.id
     // console.log(id);
 
@@ -91,7 +91,7 @@ router.delete("/category",async(req:Request,res:Response)=>{
             }
 })
 
-router.put("/category",async(req:Request,res:Response)=>{
+router.put("/category",auth(UserRole.ADMIN),async(req:Request,res:Response)=>{
     const id=req.query.id as string
     // console.log(id);
     const data=req.body 
@@ -121,6 +121,7 @@ router.put("/category",async(req:Request,res:Response)=>{
 
             }
 })
+
 
 
 

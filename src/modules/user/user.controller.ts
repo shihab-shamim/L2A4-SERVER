@@ -5,7 +5,7 @@ import { userService } from './user.service';
 const getAllUser=async(req:Request,res:Response)=>{
     try {
         const data = await userService.getAllUser()
-        console.log(data);
+      
         res.status(200).send({data})
         
     } catch (error) {
