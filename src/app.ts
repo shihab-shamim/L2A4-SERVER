@@ -8,6 +8,7 @@ import { tutorProfile } from "./modules/tutorProfile/tutorProfile.routes";
 import { users } from "./modules/user/user.routes";
 import { availability } from "./modules/availability/availability.routes";
 import { category } from "./modules/category/category.routes";
+import { booking } from "./modules/booking/booking.routes";
 
 
 
@@ -27,6 +28,7 @@ app.use("/api",tutorProfile);
 app.use("/api",users);
 app.use("/api",availability);
 app.use("/api",category);
+app.use("/api",booking);
 
 app.get("/", (req, res) => {
     res.send("Hello From skillBridge");

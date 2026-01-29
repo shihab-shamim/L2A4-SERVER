@@ -8,7 +8,7 @@ const router = express.Router();
 // auth(UserRole.TUTOR)
 router.get("/users",auth(UserRole.ADMIN),userController.getAllUser)
 router.put("/users",auth(UserRole.ADMIN),userController.userActionUpdated)
-router.put("/user/profile", async (req: Request, res: Response) => {
+router.put("/user/profile",auth(UserRole.STUDENT), async (req: Request, res: Response) => {
   try {
     const { name, email, phone, image }: {
       name: string;
@@ -57,6 +57,7 @@ router.put("/user/profile", async (req: Request, res: Response) => {
         
     }
 });
+
 
 export const users: Router = router;
 

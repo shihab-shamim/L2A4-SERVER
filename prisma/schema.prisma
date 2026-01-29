@@ -148,7 +148,7 @@ model Booking {
 
   startTime DateTime
   endTime   DateTime
-
+ 
   status BookingStatus @default(CONFIRMED)
 
   // pricing snapshot (in case tutor rate changes later)
