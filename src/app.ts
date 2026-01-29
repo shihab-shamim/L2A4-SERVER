@@ -7,6 +7,7 @@ import { auth } from "../lib/auth";
 import { tutorProfile } from "./modules/tutorProfile/tutorProfile.routes";
 import { users } from "./modules/user/user.routes";
 import { availability } from "./modules/availability/availability.routes";
+import { category } from "./modules/category/category.routes";
 
 
 
@@ -25,6 +26,7 @@ app.all("/api/auth/*splat", toNodeHandler(auth));
 app.use("/api",tutorProfile);
 app.use("/api",users);
 app.use("/api",availability);
+app.use("/api",category);
 
 app.get("/", (req, res) => {
     res.send("Hello From skillBridge");
